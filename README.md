@@ -58,29 +58,29 @@ The system follows a simple verification process:
     ✅ File Intact         ⚠️ Tampering
     / Verified             Detected
 
-## 🧩 Key Features
+🧩 Key Features
 
-### 🔐 SHA-256 Hashing
+🔐 SHA-256 Hashing
 
 Generates a cryptographic fingerprint for every uploaded document.
 
-### ⛓️ Blockchain-Based Integrity Records
+⛓️ Blockchain-Based Integrity Records
 
 Uses blockchain concepts to maintain a tamper-evident record of document information.
 
-### 🔎 Document Verification
+🔎 Document Verification
 
 Allows users to verify whether a document matches its previously recorded integrity information.
 
-### ⚠️ Tamper Detection
+⚠️ Tamper Detection
 
 Detects changes by comparing the current file hash with the stored hash.
 
-### 🌐 Web-Based Interface
+🌐 Web-Based Interface
 
 Provides a simple interface for interacting with the document integrity system.
 
-### 🛡️ Cybersecurity Focused
+🛡️ Cybersecurity Focused
 
 Demonstrates practical cybersecurity concepts including:
 
@@ -93,9 +93,9 @@ Demonstrates practical cybersecurity concepts including:
 
 ---
 
-## 🏗️ Project Architecture
+🏗️ Project Architecture
 
-```text
+
 ┌───────────────────────────────┐
 │          User / Client        │
 └───────────────┬───────────────┘
@@ -129,7 +129,7 @@ Demonstrates practical cybersecurity concepts including:
 
 ## 🔄 System Workflow
 
-```text
+
        📄 Upload Document
                 │
                 ▼
@@ -158,7 +158,7 @@ IntegraChain uses cryptographic hashing and blockchain-based records to provide 
 
 A document is processed using the **SHA-256 hashing algorithm**, producing a unique hash value that represents its content. During verification, the document is hashed again and the resulting value is compared with the previously stored integrity record.
 
-```text
+
 Original Document
        │
        ▼
