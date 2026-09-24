@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="IntegraChain: Blockchain-Powered Document Integrity & Verification">
-    <title>IntegraChain | Document Integrity &amp; Verification</title>
+    <title>Blockchain Explorer | IntegraChain</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,86 +13,44 @@
         <div class="container nav-inner">
             <a href="index.html" class="brand" aria-label="IntegraChain home"><span class="brand-icon" aria-hidden="true">⬡</span>IntegraChain</a>
             <nav class="nav-links" aria-label="Main">
-                <a class="active" href="index.html" aria-current="page">Home</a>
+                <a href="index.html">Home</a>
                 <a href="upload.html">Register Document</a>
                 <a href="verify.html">Verify Document</a>
-                <a href="blockchain.html">Blockchain Explorer</a>
+                <a class="active" href="blockchain.html" aria-current="page">Blockchain Explorer</a>
             </nav>
             <a href="upload.html" class="btn primary sm nav-cta">Register a Document</a>
         </div>
     </header>
 
-    <main id="main">
-        <section class="hero">
-            <div class="container hero-grid">
-                <div>
-                    <p class="kicker">Blockchain-powered document integrity</p>
-                    <h1>Verify every document.<span class="line-2">Trust every hash.</span></h1>
-                    <p class="lead">IntegraChain checks the integrity of digital documents using SHA-256 cryptographic hashing and tamper-evident blockchain records. Register a file once, then prove it is unchanged at any time.</p>
-                    <div class="hero-actions">
-                        <a href="upload.html" class="btn primary">Register a Document</a>
-                        <a href="verify.html" class="btn outline">Verify a Document</a>
-                    </div>
-                </div>
+    <main id="main" class="page wide">
+        <div class="page-header">
+            <p class="kicker">Blockchain explorer</p>
+            <h1>Blockchain Explorer</h1>
+            <p>Inspect document integrity records and validate the chain.</p>
+        </div>
 
-                <div class="pipeline">
-                    <p class="pipeline-title"><span>integrachain / pipeline</span><span>LIVE</span></p>
-                    <ol aria-label="How a document moves through IntegraChain">
-                    <li><span class="node" aria-hidden="true">▤</span>Document</li>
-                    <li><span class="node" aria-hidden="true">#</span>SHA-256<small>7f83b1657ff1fc53…</small></li>
-                    <li><span class="node" aria-hidden="true">◈</span>Hash</li>
-                    <li><span class="node" aria-hidden="true">⬡</span>Blockchain</li>
-                    <li class="done"><span class="node" aria-hidden="true">✓</span>Verified</li>
-                    </ol>
-                </div>
-            </div>
+        <section class="dash" aria-label="Chain summary">
+            <div class="card"><div class="k">Total Blocks</div><div class="v" id="statBlocks">–</div></div>
+            <div class="card"><div class="k">Chain Status</div><div class="v" id="statStatus">Not validated</div></div>
+            <div class="card"><div class="k">Latest Block</div><div class="v" id="statLatest">–</div></div>
+            <div class="card"><div class="k">Documents Registered</div><div class="v" id="statDocs">–</div></div>
         </section>
 
-        <section class="container" aria-label="Key facts">
-            <div class="stats">
-                <div class="card stat"><strong>SHA-256</strong><span>Cryptographic hashing</span></div>
-                <div class="card stat"><strong>Blockchain</strong><span>Tamper-evident records</span></div>
-                <div class="card stat"><strong>10 MB</strong><span>Maximum file size</span></div>
-                <div class="card stat"><strong>5</strong><span>Supported file types</span></div>
-            </div>
-        </section>
+        <div class="blockchain-actions">
+            <button type="button" id="validateBtn" class="btn primary">Validate Chain</button>
+            <button type="button" id="refreshBtn" class="btn outline">Refresh Blockchain</button>
+        </div>
 
-        <section class="section container" aria-labelledby="how-title">
-            <div class="section-head">
-                <h2 id="how-title">How it works</h2>
-                <p>Four steps from upload to proof.</p>
-            </div>
-            <ol class="steps">
-                <li class="step"><div class="step-number">01</div><h3>Upload document</h3><p>Choose a PDF, TXT, JPG, JPEG or PNG file up to 10 MB.</p></li>
-                <li class="step"><div class="step-number">02</div><h3>Generate SHA-256 hash</h3><p>A unique fingerprint is calculated from the file's contents.</p></li>
-                <li class="step"><div class="step-number">03</div><h3>Record integrity</h3><p>The fingerprint is stored in a block linked to the previous one.</p></li>
-                <li class="step"><div class="step-number">04</div><h3>Verify anytime</h3><p>Upload the file again to see if it is original, tampered or not registered.</p></li>
-            </ol>
-        </section>
+        <div id="validationResult" class="result-container" aria-live="polite"></div>
 
-        <section class="container" aria-labelledby="sec-title">
-            <div class="section-head">
-                <h2 id="sec-title">Built to detect any change</h2>
-                <p>Even a single altered character produces a completely different hash.</p>
-            </div>
-            <div class="grid-4">
-                <div class="card"><div class="icon-badge" aria-hidden="true">#</div><h3>Cryptographic integrity</h3><p>Every document is reduced to a SHA-256 fingerprint.</p></div>
-                <div class="card"><div class="icon-badge" aria-hidden="true">⚠</div><h3>Tamper detection</h3><p>Modified files are flagged with both hashes side by side.</p></div>
-                <div class="card"><div class="icon-badge" aria-hidden="true">⬡</div><h3>Blockchain-backed records</h3><p>Blocks reference the previous hash, so edits break the chain.</p></div>
-                <div class="card"><div class="icon-badge" aria-hidden="true">✓</div><h3>Document verification</h3><p>Get a clear verified, tampered or not found result.</p></div>
-            </div>
-        </section>
+        <div class="toolbar">
+            <label for="blockSearch" class="sr-only">Search blocks</label>
+            <input type="search" id="blockSearch" class="field-input" placeholder="Search by file name, document ID or hash">
+        </div>
 
-        <section class="section container" aria-labelledby="cta-title">
-            <div class="cta-band">
-                <h2 id="cta-title">Protect the integrity of your digital documents.</h2>
-                <p>Register a document now, or check one against the chain.</p>
-                <div class="hero-actions">
-                    <a href="upload.html" class="btn primary">Register a Document</a>
-                    <a href="blockchain.html" class="btn outline">Open Blockchain Explorer</a>
-                </div>
-            </div>
-        </section>
+        <div id="blockchainContainer" class="blockchain-grid" aria-live="polite">
+            <div class="loading">Loading blockchain records...</div>
+        </div>
     </main>
 
     <footer>
@@ -102,5 +59,7 @@
             <p class="footer-small">Blockchain-Powered Document Integrity &amp; Verification</p>
         </div>
     </footer>
+
+    <script src="js/script.js"></script>
 </body>
 </html>
