@@ -1,7 +1,0 @@
-[build]
-  publish = "frontend"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
