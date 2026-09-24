@@ -1,241 +1,234 @@
+<div align="center">
+
 # 🔐 IntegraChain
+
 ### Blockchain-Powered Digital Document Integrity & Verification System
 
-> **Verify. Detect. Protect.**  
-> A lightweight cybersecurity system that combines **SHA-256 hashing** and **blockchain technology** to verify digital document integrity and detect unauthorized modifications.
+**Verify • Detect • Protect**
+
+[![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![SHA-256](https://img.shields.io/badge/SHA--256-Cryptographic_Hashing-6C3483?style=for-the-badge)](https://en.wikipedia.org/wiki/SHA-2)
+[![Blockchain](https://img.shields.io/badge/Blockchain-Integrity-121212?style=for-the-badge)](https://en.wikipedia.org/wiki/Blockchain)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/)
+
+</div>
 
 ---
 
-## 📌 Overview
+## 📌 Introduction
 
-**IntegraChain** is a cybersecurity-focused web application designed to protect the integrity of digital documents.
+**IntegraChain** is a cybersecurity web application designed to verify the integrity of digital documents using **SHA-256 cryptographic hashing** and **blockchain technology**.
 
-Digital files can be modified after they are created or shared. IntegraChain addresses this problem by generating a unique **SHA-256 cryptographic hash** for a document and recording its integrity information on a blockchain.
+It helps identify whether a document has been modified after its original integrity record was created.
 
-When a document needs to be verified, the system calculates its hash again and compares it with the previously recorded blockchain data.
+---
 
-If the hashes match, the document is considered **unchanged**.
+## 🌐 Overview
 
-If the hashes are different, the system can identify that the document has been **modified or tampered with**.
+IntegraChain generates a unique **cryptographic fingerprint** for every document.
+
+The generated hash is associated with an integrity record. During verification, the document is hashed again and the new hash is compared with the stored value.
+
+```text
+Document → SHA-256 → Integrity Record → Verification → Result
+```
+
+This provides a simple approach to **document integrity verification and tamper detection**.
 
 ---
 
 ## 🎯 Objectives
 
-- 🔒 Protect digital document integrity
-- 🔍 Detect unauthorized file modifications
-- 🧾 Generate unique SHA-256 document fingerprints
-- ⛓️ Store verification records using blockchain concepts
-- ✅ Provide a simple document verification workflow
-- 🛡️ Demonstrate practical cybersecurity concepts
+| Objective | Description |
+|-----------|-------------|
+| 🔐 **Data Integrity** | Protect the integrity of digital documents |
+| 🔎 **Verification** | Verify documents using cryptographic hashes |
+| ⚠️ **Tamper Detection** | Identify changes made to document contents |
+| ⛓️ **Blockchain Records** | Maintain tamper-evident integrity information |
+| 🌐 **Web Interface** | Provide a simple and accessible verification system |
 
 ---
 
 ## ⚙️ How IntegraChain Works
 
-The system follows a simple verification process:
+The application follows a straightforward verification process:
+
+**01** → 📄 **Upload Document**  
+The user uploads a digital document.
+
+**02** → 🔐 **Generate Hash**  
+IntegraChain generates a SHA-256 hash from the document.
+
+**03** → ⛓️ **Record Integrity**  
+The document's integrity information is recorded.
+
+**04** → 🔎 **Verify Document**  
+The user uploads the document again when verification is required.
+
+**05** → ⚖️ **Compare Hashes**  
+The newly generated hash is compared with the stored hash.
+
+**06** → ✅ / ⚠️ **Verification Result**
 
 ```text
-             📄 Digital Document
-                     │
-                     ▼
-              SHA-256 Hashing
-                     │
-                     ▼
-            Unique File Hash
-                     │
-                     ▼
-             Blockchain Record
-                     │
-                     ▼
-              🔐 Verification
-                     │
-          ┌──────────┴──────────┐
-          ▼                     ▼
-     Hash Matches          Hash Differs
-          │                     │
-          ▼                     ▼
-    ✅ File Intact         ⚠️ Tampering
-    / Verified             Detected
-
-🧩 Key Features
-
-🔐 SHA-256 Hashing
-
-Generates a cryptographic fingerprint for every uploaded document.
-
-⛓️ Blockchain-Based Integrity Records
-
-Uses blockchain concepts to maintain a tamper-evident record of document information.
-
-🔎 Document Verification
-
-Allows users to verify whether a document matches its previously recorded integrity information.
-
-⚠️ Tamper Detection
-
-Detects changes by comparing the current file hash with the stored hash.
-
-🌐 Web-Based Interface
-
-Provides a simple interface for interacting with the document integrity system.
-
-🛡️ Cybersecurity Focused
-
-Demonstrates practical cybersecurity concepts including:
-
-- 🔐 Cryptographic hashing
-- 🛡️ Data integrity
-- ⛓️ Blockchain
-- 🔎 File verification
-- ⚠️ Tamper detection
-- 🔒 Secure record keeping
-
----
-
-🏗️ Project Architecture
-
-
-┌───────────────────────────────┐
-│          User / Client        │
-└───────────────┬───────────────┘
-                │
-                ▼
-┌───────────────────────────────┐
-│       Web Application         │
-│        / Frontend UI          │
-└───────────────┬───────────────┘
-                │
-                ▼
-┌───────────────────────────────┐
-│        Backend / API          │
-│           Python              │
-└───────────────┬───────────────┘
-                │
-        ┌───────┴────────┐
-        ▼                ▼
-┌──────────────┐  ┌────────────────┐
-│ SHA-256 Hash │  │   Blockchain   │
-│  Generation  │  │ Integrity Data │
-└──────────────┘  └────────────────┘
+                    📄 Document
                          │
                          ▼
-                  ┌──────────────┐
-                  │ Verification │
-                  └──────────────┘
+                  🔐 SHA-256 Hash
+                         │
+                         ▼
+                ⛓️ Integrity Record
+                         │
+                         ▼
+                🔎 Verification
+                         │
+                  ┌──────┴──────┐
+                  ▼             ▼
+              Same Hash     Different Hash
+                  │             │
+                  ▼             ▼
+              ✅ VERIFIED    ⚠️ MODIFIED
 ```
 
 ---
+
+## 🏗️ Project Architecture
+
+```text
+┌─────────────────────────────────┐
+│          👤 USER / CLIENT       │
+└────────────────┬────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────┐
+│        🌐 WEB APPLICATION       │
+│           FRONTEND UI           │
+└────────────────┬────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────┐
+│         🐍 PYTHON BACKEND       │
+│             FASTAPI             │
+└────────────────┬────────────────┘
+                 │
+          ┌──────┴──────┐
+          ▼             ▼
+┌────────────────┐ ┌─────────────────┐
+│ 🔐 SHA-256     │ │ ⛓️ BLOCKCHAIN   │
+│    HASHING     │ │    RECORDS      │
+└────────────────┘ └────────┬────────┘
+                            │
+                            ▼
+                  ┌──────────────────┐
+                  │ 🔎 VERIFICATION  │
+                  └──────────────────┘
+```
+
+---
+
 ## 🔄 System Workflow
 
-
-       📄 Upload Document
+```text
+        📄 DOCUMENT UPLOAD
                 │
                 ▼
-        🔐 Generate SHA-256
+       🔐 SHA-256 HASHING
                 │
                 ▼
-       ⛓️ Store Integrity Data
+      ⛓️ INTEGRITY RECORD
                 │
                 ▼
-          🔎 Verify Document
+       🔎 DOCUMENT VERIFY
                 │
-        ┌───────┴────────┐
-        ▼                ▼
-   Hash Matches      Hash Differs
-        │                │
-        ▼                ▼
-   ✅ Verified       ⚠️ Tampering
-                       Detected
+                ▼
+         ⚖️ HASH COMPARE
+                │
+          ┌─────┴─────┐
+          ▼           ▼
+       MATCH       DIFFERENT
+          │           │
+          ▼           ▼
+    ✅ VERIFIED   ⚠️ MODIFIED
 ```
 
 ---
 
 ## 🛡️ Security Approach
 
-IntegraChain uses cryptographic hashing and blockchain-based records to provide a mechanism for verifying whether a digital document has remained unchanged.
+IntegraChain uses **cryptographic hashing** to create a unique representation of document contents.
 
-A document is processed using the **SHA-256 hashing algorithm**, producing a unique hash value that represents its content. During verification, the document is hashed again and the resulting value is compared with the previously stored integrity record.
+The SHA-256 hash acts as a digital fingerprint. If even a small part of the document changes, its resulting hash will change.
 
+The system compares the newly generated hash with the previously stored integrity record to identify possible modifications.
 
-Original Document
-       │
-       ▼
-   SHA-256 Hash
-       │
-       ▼
-Blockchain Integrity Record
-       │
-       │
-       ▼
-Document Submitted for Verification
-       │
-       ▼
-   SHA-256 Hash
-       │
-       ▼
-    Compare
-    /     \
-   /       \
-Same       Different
- │            │
- ▼            ▼
-✅ Valid     ⚠️ Modified
-```
+> **Same Hash = Content Integrity Maintained**  
+> **Different Hash = Possible Modification Detected**
 
 ---
 
-## 💡 Core Technologies
+## 🧩 Core Technologies
 
-| Technology | Purpose |
-|------------|---------|
-| 🐍 Python | Backend application logic |
-| ⚡ FastAPI | REST API and backend framework |
-| 🔐 SHA-256 | Cryptographic document hashing |
-| ⛓️ Blockchain | Integrity record management |
-| 🌐 HTML/CSS/JavaScript | Frontend interface |
-| 🗄️ SQLite | Data storage |
-| 🚀 Uvicorn | ASGI application server |
-| 🐙 GitHub | Version control and collaboration |
+| Technology | Role |
+|------------|------|
+| 🐍 **Python** | Backend application logic |
+| ⚡ **FastAPI** | REST API and backend framework |
+| 🔐 **SHA-256** | Cryptographic document hashing |
+| ⛓️ **Blockchain** | Integrity record management |
+| 🌐 **HTML / CSS / JavaScript** | Frontend interface |
+| 🗄️ **SQLite** | Data storage |
+| 🚀 **Uvicorn** | Application server |
+| 🐙 **GitHub** | Version control & collaboration |
 
 ---
 
 ## 🎯 Project Goal
 
-The primary goal of **IntegraChain** is to demonstrate how cryptographic hashing and blockchain concepts can be combined to create a system for **digital document integrity verification and tamper detection**.
+The goal of **IntegraChain** is to demonstrate how **cryptographic hashing and blockchain concepts** can be combined to create a practical system for:
 
-> **Verify. Detect. Protect. 🔐**
+- Digital document integrity
+- Document verification
+- Tamper detection
+- Secure integrity records
+
+---
 
 ## 🚀 Installation & Setup
 
-### 1. Clone the Repository
+### 1️⃣ Clone the Repository
 
 ```bash
 git clone https://github.com/tanvikhanekar21/IntegraChain.git
 cd IntegraChain
 ```
 
-### 2. Create & Activate Virtual Environment
+### 2️⃣ Create a Virtual Environment
 
-**Windows:**
 ```bash
 python -m venv venv
+```
+
+### 3️⃣ Activate the Environment
+
+**Windows**
+
+```bash
 venv\Scripts\activate
 ```
 
-**Linux / macOS:**
+**Linux / macOS**
+
 ```bash
-python -m venv venv
 source venv/bin/activate
 ```
 
-### 3. Install Dependencies
+### 4️⃣ Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Start the Application
+### 5️⃣ Start the Application
 
 ```bash
 uvicorn main:app --reload
@@ -247,61 +240,93 @@ Open the local URL displayed by Uvicorn in your browser.
 
 ## 🧪 Example Use Case
 
-1. 📄 Upload a document.
-2. 🔐 Generate its SHA-256 hash.
-3. ⛓️ Store the integrity record.
-4. 🔎 Upload the document again for verification.
-5. Compare the new hash with the stored hash.
+Imagine an important digital document that needs to be verified.
 
-**Same hash → ✅ Document verified**
+```text
+📄 Original Document
+        │
+        ▼
+   🔐 SHA-256 Hash
+        │
+        ▼
+⛓️ Integrity Record
+        │
+        ▼
+📄 Document Submitted Again
+        │
+        ▼
+   🔐 New SHA-256 Hash
+        │
+        ▼
+      ⚖️ Compare
+       /       \
+      /         \
+   MATCH      DIFFERENT
+     │             │
+     ▼             ▼
+ ✅ VERIFIED   ⚠️ MODIFIED
+```
 
-**Different hash → ⚠️ Possible modification detected**
+A matching hash indicates that the document content has remained unchanged.
+
+A different hash indicates that the document may have been modified.
 
 ---
 
 ## 🔐 Security Concepts
 
-IntegraChain demonstrates:
+IntegraChain demonstrates practical cybersecurity concepts including:
 
-- 🔐 SHA-256 cryptographic hashing
-- 🛡️ Digital data integrity
-- ⛓️ Blockchain-based records
-- ⚠️ Tamper detection
-- 🔎 Document verification
+- 🔐 **Cryptographic Hashing**
+- 🛡️ **Data Integrity**
+- ⛓️ **Blockchain Technology**
+- 🔎 **Document Verification**
+- ⚠️ **Tamper Detection**
+- 🔒 **Secure Record Keeping**
 
 ---
 
 ## 🎓 Project Purpose
 
-IntegraChain is an academic **BSc Cyber Security project** demonstrating the practical use of blockchain and cryptographic hashing for digital document integrity and tamper detection.
+IntegraChain was developed as an academic **BSc Cyber Security project** to demonstrate the practical application of:
+
+**Cybersecurity • Cryptography • Blockchain • Web Development • API Development**
+
+The project provides a practical example of using modern security concepts to address digital document integrity challenges.
 
 ---
 
 ## 🔮 Future Enhancements
 
-- 👤 User authentication
+The project can be extended with:
+
+- 👤 User authentication & authorization
 - ☁️ Cloud storage integration
-- 📊 Verification history
+- 📊 Document verification history
 - 🔗 Public verification links
-- 🔔 Tampering alerts
+- 🔔 Real-time tampering alerts
 - 🧾 Digital signatures
-- 📱 Improved mobile support
-- 🌐 Production backend deployment
+- 📱 Enhanced mobile responsiveness
+- 🌐 Production-ready backend deployment
 
 ---
 
 ## ⚠️ Disclaimer
 
-IntegraChain is developed for **academic, learning, and demonstration purposes**. Further security testing and hardening are recommended before production use.
+> **IntegraChain is an academic project developed for educational, learning, and demonstration purposes.**
+
+The application should undergo additional security testing, validation, and hardening before being used with sensitive documents or in a production environment.
 
 ---
 
 ## 👩‍💻 Project Team
 
-**BSc Cyber Security Academic Project**
+### BSc Cyber Security Academic Project
 
-- **Tanvi Khanekar** ❤️
-- **Gauri Somwanshi** ❤️
+| Team Member |
+|-------------|
+| **Tanvi Khanekar**❤️ |
+| **Gauri Somwanshi**❤️ |
 
 ---
 
@@ -309,15 +334,27 @@ IntegraChain is developed for **academic, learning, and demonstration purposes**
 
 This project is licensed under the **MIT License**.
 
-See the `LICENSE` file for details.
+See the [`LICENSE`](LICENSE) file for complete details.
 
 ---
 
 ## ⭐ Support
 
-If you find IntegraChain useful:
+If you find **IntegraChain** useful or interesting:
 
-⭐ Star the repository  
-🍴 Fork the project  
-💡 Suggest improvements  
-🐛 Report issues
+⭐ **Star** the repository  
+🍴 **Fork** the project  
+💡 **Suggest** improvements  
+🐛 **Report** issues
+
+---
+
+<div align="center">
+
+## 🔐 IntegraChain
+
+### **Verify. Detect. Protect.**
+
+**Built with ❤️ for Cybersecurity**
+
+</div>
