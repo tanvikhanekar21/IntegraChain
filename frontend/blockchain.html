@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Blockchain Explorer | BlockVerify</title>
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+    <nav class="navbar">
+
+        <a href="index.html" class="brand">
+            <span class="brand-icon">⬡</span>
+            BlockVerify
+        </a>
+
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="upload.html">Register</a>
+            <a href="verify.html">Verify</a>
+            <a class="active" href="blockchain.html">Blockchain</a>
+        </div>
+
+    </nav>
+
+
+    <main class="page-wrapper wide">
+
+        <div class="page-header">
+
+            <p class="small-title">
+                BLOCKCHAIN EXPLORER
+            </p>
+
+            <h1>Explore Registered Documents</h1>
+
+            <p>
+                View all blockchain blocks and validate
+                the integrity of the complete chain.
+            </p>
+
+        </div>
+
+
+        <div class="blockchain-actions">
+
+            <button
+                class="btn primary"
+                onclick="validateBlockchain()">
+
+                Validate Blockchain
+
+            </button>
+
+            <button
+                class="btn outline dark-outline"
+                onclick="loadBlockchain()">
+
+                Refresh Data
+
+            </button>
+
+        </div>
+
+
+        <div id="validationResult"
+             class="result-container">
+        </div>
+
+
+        <div id="blockchainContainer"
+             class="blockchain-grid">
+
+            <div class="loading">
+                Loading blockchain records...
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <script src="js/script.js"></script>
+
+</body>
+
+</html>
