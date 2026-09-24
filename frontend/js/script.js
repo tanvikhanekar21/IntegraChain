@@ -1,5 +1,5 @@
 // ==========================================
-// API CONFIGURATION
+// API CONFIGURATION (unchanged)
 // ==========================================
 
 // Use the backend serving this page, with a local fallback when opened directly.
@@ -8,675 +8,468 @@ const API_BASE_URL = window.location.protocol === "file:"
     : window.location.origin;
 
 
-
 // ==========================================
-// UPLOAD FILE NAME DISPLAY
+// SAFE DOM HELPERS (no server strings in innerHTML)
 // ==========================================
 
-const uploadFileInput =
-    document.getElementById("uploadFile");
+function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined && text !== null) node.textContent = String(text);
+    return node;
+}
 
-const selectedFileText =
-    document.getElementById("selectedFile");
+function clearNode(node) {
+    while (node.firstChild) node.removeChild(node.firstChild);
+}
 
+function formatSize(bytes) {
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+}
 
-if (uploadFileInput && selectedFileText) {
+function shortHash(value) {
+    const text = String(value);
+    return text.length > 28 ? text.slice(0, 14) + "…" + text.slice(-10) : text;
+}
 
-    uploadFileInput.addEventListener(
-        "change",
-        function () {
+function copyButton(value) {
+    const btn = el("button", "copy-btn", "Copy");
+    btn.type = "button";
+    btn.setAttribute("aria-label", "Copy value to clipboard");
+    btn.addEventListener("click", function () {
+        navigator.clipboard.writeText(String(value)).then(function () {
+            btn.textContent = "Copied";
+        }).catch(function () {
+            btn.textContent = "Copy failed";
+        }).finally(function () {
+            setTimeout(function () { btn.textContent = "Copy"; }, 1500);
+        });
+    });
+    return btn;
+}
 
-            if (this.files.length > 0) {
+function hashBox(label, value, copyable) {
+    const box = el("div", "hash-box");
+    const head = el("div", "hash-label");
+    head.appendChild(el("span", "", label));
+    if (copyable) head.appendChild(copyButton(value));
+    box.appendChild(head);
+    box.appendChild(el("div", "hash-text", value));
+    return box;
+}
 
-                selectedFileText.textContent =
-                    "Selected: " + this.files[0].name;
+function statusCard(className, icon, label, message, explain) {
+    const card = el("div", "result-card " + className);
+    const head = el("div", "result-head");
+    const iconNode = el("span", "result-icon", icon);
+    iconNode.setAttribute("aria-hidden", "true");
+    head.appendChild(iconNode);
+    head.appendChild(el("div", "result-label", label));
+    card.appendChild(head);
+    if (message) card.appendChild(el("p", "", message));
+    if (explain) card.appendChild(el("p", "explain", explain));
+    return card;
+}
 
-            }
+function showCard(container, card) {
+    clearNode(container);
+    container.appendChild(card);
+}
 
-        }
-    );
-
+function setBusy(button, busy, idleText, busyText) {
+    if (!button) return;
+    button.disabled = busy;
+    clearNode(button);
+    if (busy) {
+        const spin = el("span", "spinner");
+        spin.setAttribute("aria-hidden", "true");
+        button.appendChild(spin);
+        button.appendChild(document.createTextNode(busyText));
+    } else {
+        button.textContent = idleText;
+    }
 }
 
 
-
 // ==========================================
-// VERIFY FILE NAME DISPLAY
+// FILE PICKER (name display, drag & drop, clear)
+// Keeps ids: uploadFile / selectedFile, verifyFile / verifySelectedFile
 // ==========================================
 
-const verifyFileInput =
-    document.getElementById("verifyFile");
+function setupFilePicker(inputId, infoId) {
+    const input = document.getElementById(inputId);
+    const info = document.getElementById(infoId);
+    if (!input || !info) return;
 
-const verifySelectedFile =
-    document.getElementById("verifySelectedFile");
+    function render() {
+        clearNode(info);
+        if (input.files.length === 0) return;
 
+        const file = input.files[0];
+        const ext = (file.name.split(".").pop() || "file").toUpperCase().slice(0, 4);
 
-if (verifyFileInput && verifySelectedFile) {
+        const chip = el("div", "file-chip");
+        chip.appendChild(el("div", "file-icon", ext));
 
-    verifyFileInput.addEventListener(
-        "change",
-        function () {
+        const meta = el("div", "file-meta");
+        meta.appendChild(el("strong", "", file.name));
+        meta.appendChild(el("span", "", (file.type || ext + " file") + " · " + formatSize(file.size)));
+        chip.appendChild(meta);
 
-            if (this.files.length > 0) {
+        const remove = el("button", "btn outline sm", "Remove");
+        remove.type = "button";
+        remove.setAttribute("aria-label", "Remove selected file " + file.name);
+        remove.addEventListener("click", function () {
+            input.value = "";
+            render();
+        });
+        chip.appendChild(remove);
 
-                verifySelectedFile.textContent =
-                    "Selected: " + this.files[0].name;
+        info.appendChild(chip);
+    }
 
+    input.addEventListener("change", render);
+
+    const zone = input.closest(".upload-area");
+    if (zone) {
+        ["dragenter", "dragover"].forEach(function (name) {
+            zone.addEventListener(name, function (event) {
+                event.preventDefault();
+                zone.classList.add("dragover");
+            });
+        });
+        ["dragleave", "drop"].forEach(function (name) {
+            zone.addEventListener(name, function (event) {
+                event.preventDefault();
+                zone.classList.remove("dragover");
+            });
+        });
+        zone.addEventListener("drop", function (event) {
+            if (event.dataTransfer && event.dataTransfer.files.length > 0) {
+                input.files = event.dataTransfer.files;
+                render();
             }
-
-        }
-    );
-
+        });
+    }
 }
 
+setupFilePicker("uploadFile", "selectedFile");
+setupFilePicker("verifyFile", "verifySelectedFile");
 
 
 // ==========================================
-// UPLOAD DOCUMENT
+// UPLOAD DOCUMENT  (POST /upload, FormData "file")
 // ==========================================
 
-const uploadForm =
-    document.getElementById("uploadForm");
-
+const uploadForm = document.getElementById("uploadForm");
 
 if (uploadForm) {
 
-    uploadForm.addEventListener(
-        "submit",
-        async function (event) {
+    uploadForm.addEventListener("submit", async function (event) {
 
-            event.preventDefault();
+        event.preventDefault();
 
-            const file =
-                document.getElementById("uploadFile").files[0];
+        const file = document.getElementById("uploadFile").files[0];
+        const resultContainer = document.getElementById("uploadResult");
+        const button = document.getElementById("uploadBtn");
 
-            const resultContainer =
-                document.getElementById("uploadResult");
+        if (!file) {
+            showCard(resultContainer, statusCard("not-found", "!", "No file selected", "Please select a file."));
+            return;
+        }
 
+        const formData = new FormData();
+        formData.append("file", file);
 
-            if (!file) {
+        setBusy(button, true, "Register Document", "Processing Document...");
+        showCard(resultContainer, statusCard(
+            "", "…", "Processing Document...",
+            "Generating SHA-256 hash and creating blockchain record."
+        ));
 
-                resultContainer.innerHTML = `
-                    <div class="result-card not-found">
-                        <h2>Please select a file.</h2>
-                    </div>
-                `;
+        try {
 
-                return;
+            const response = await fetch(`${API_BASE_URL}/upload`, {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || "Upload failed.");
             }
 
+            const card = statusCard("success", "✓", "DOCUMENT REGISTERED", data.message);
+            card.appendChild(hashBox("Document ID", data.document_id, true));
+            card.appendChild(hashBox("SHA-256 Hash", data.file_hash, true));
+            card.appendChild(hashBox("Block Number", data.block_index, false));
+            card.appendChild(hashBox("Registered At", data.timestamp, false));
 
-            const formData = new FormData();
+            const qr = el("a", "btn primary", "View QR Code");
+            qr.href = `${API_BASE_URL}/qr/${data.document_id}`;
+            qr.target = "_blank";
+            qr.rel = "noopener";
+            card.appendChild(qr);
 
-            formData.append("file", file);
+            showCard(resultContainer, card);
 
+        } catch (error) {
 
-            resultContainer.innerHTML = `
-                <div class="result-card">
-                    <h2>Processing Document...</h2>
-                    <p>
-                        Generating SHA-256 hash and creating blockchain record.
-                    </p>
-                </div>
-            `;
+            showCard(resultContainer, statusCard(
+                "tampered", "✕", "Upload Failed", error.message
+            ));
 
+        } finally {
 
-            try {
-
-                const response = await fetch(
-                    `${API_BASE_URL}/upload`,
-                    {
-                        method: "POST",
-                        body: formData
-                    }
-                );
-
-
-                const data = await response.json();
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        data.detail || "Upload failed."
-                    );
-
-                }
-
-
-                resultContainer.innerHTML = `
-
-                    <div class="result-card success">
-
-                        <div class="result-label">
-                            DOCUMENT REGISTERED
-                        </div>
-
-                        <p>${data.message}</p>
-
-                        <div class="hash-box">
-                            <strong>Document ID:</strong><br>
-                            ${data.document_id}
-                        </div>
-
-                        <div class="hash-box">
-                            <strong>SHA-256 Hash:</strong><br>
-                            ${data.file_hash}
-                        </div>
-
-                        <div class="hash-box">
-                            <strong>Block Number:</strong><br>
-                            ${data.block_index}
-                        </div>
-
-                        <div class="hash-box">
-                            <strong>Registered At:</strong><br>
-                            ${data.timestamp}
-                        </div>
-
-                        <br>
-
-                        <a
-                            class="btn primary"
-                            href="${API_BASE_URL}/qr/${data.document_id}"
-                            target="_blank"
-                        >
-                            View QR Code
-                        </a>
-
-                    </div>
-
-                `;
-
-
-            } catch (error) {
-
-                resultContainer.innerHTML = `
-
-                    <div class="result-card tampered">
-
-                        <h2>Upload Failed</h2>
-
-                        <p>${error.message}</p>
-
-                    </div>
-
-                `;
-
-            }
+            setBusy(button, false, "Register Document", "");
 
         }
-    );
-
+    });
 }
 
 
-
 // ==========================================
-// VERIFY DOCUMENT
+// VERIFY DOCUMENT  (POST /verify, FormData "file")
 // ==========================================
 
-const verifyForm =
-    document.getElementById("verifyForm");
-
+const verifyForm = document.getElementById("verifyForm");
 
 if (verifyForm) {
 
-    verifyForm.addEventListener(
-        "submit",
-        async function (event) {
+    verifyForm.addEventListener("submit", async function (event) {
 
-            event.preventDefault();
+        event.preventDefault();
 
+        const file = document.getElementById("verifyFile").files[0];
+        const resultContainer = document.getElementById("verifyResult");
+        const button = document.getElementById("verifyBtn");
 
-            const file =
-                document.getElementById("verifyFile").files[0];
+        if (!file) {
+            showCard(resultContainer, statusCard("not-found", "!", "No file selected", "Please select a file to verify."));
+            return;
+        }
 
+        const formData = new FormData();
+        formData.append("file", file);
 
-            const resultContainer =
-                document.getElementById("verifyResult");
+        setBusy(button, true, "Verify Document", "Verifying Document...");
+        showCard(resultContainer, statusCard(
+            "", "…", "Verifying Document...",
+            "Comparing the SHA-256 fingerprint with blockchain records."
+        ));
 
+        try {
 
-            if (!file) {
+            const response = await fetch(`${API_BASE_URL}/verify`, {
+                method: "POST",
+                body: formData
+            });
 
-                return;
+            const data = await response.json();
 
+            if (!response.ok) {
+                throw new Error(data.detail || "Verification failed.");
             }
 
-
-            const formData = new FormData();
-
-            formData.append("file", file);
-
-
-            resultContainer.innerHTML = `
-
-                <div class="result-card">
-
-                    <h2>Verifying Document...</h2>
-
-                    <p>
-                        Comparing the SHA-256 fingerprint with blockchain records.
-                    </p>
-
-                </div>
-
-            `;
-
-
-            try {
-
-                const response = await fetch(
-                    `${API_BASE_URL}/verify`,
-                    {
-                        method: "POST",
-                        body: formData
-                    }
-                );
-
-
-                const data = await response.json();
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        data.detail || "Verification failed."
-                    );
-
-                }
-
-
-                let resultClass = "not-found";
-
-                let title = data.status;
-
-
-                if (data.status === "VERIFIED") {
-
-                    resultClass = "verified";
-
-                    title = "✓ VERIFIED";
-
-                }
-
-
-                if (data.status === "TAMPERED") {
-
-                    resultClass = "tampered";
-
-                    title = "⚠ TAMPERED";
-
-                }
-
-
-                if (data.status === "NOT FOUND") {
-
-                    resultClass = "not-found";
-
-                    title = "NOT FOUND";
-
-                }
-
-
-                let extraInformation = "";
-
-
-                if (data.file_hash) {
-
-                    extraInformation += `
-
-                        <div class="hash-box">
-
-                            <strong>File Hash:</strong><br>
-
-                            ${data.file_hash}
-
-                        </div>
-
-                    `;
-
-                }
-
-
-                if (data.original_hash) {
-
-                    extraInformation += `
-
-                        <div class="hash-box">
-
-                            <strong>Original Hash:</strong><br>
-
-                            ${data.original_hash}
-
-                        </div>
-
-                    `;
-
-                }
-
-
-                if (data.current_hash) {
-
-                    extraInformation += `
-
-                        <div class="hash-box">
-
-                            <strong>Current Hash:</strong><br>
-
-                            ${data.current_hash}
-
-                        </div>
-
-                    `;
-
-                }
-
-
-                resultContainer.innerHTML = `
-
-                    <div class="result-card ${resultClass}">
-
-                        <div class="result-label">
-                            ${title}
-                        </div>
-
-                        <p>${data.message}</p>
-
-                        ${extraInformation}
-
-                    </div>
-
-                `;
-
-
-            } catch (error) {
-
-                resultContainer.innerHTML = `
-
-                    <div class="result-card tampered">
-
-                        <h2>Verification Failed</h2>
-
-                        <p>${error.message}</p>
-
-                    </div>
-
-                `;
-
+            let resultClass = "not-found";
+            let icon = "?";
+            let title = data.status;
+            let explain = "No registered record was found for this document.";
+
+            if (data.status === "VERIFIED") {
+                resultClass = "verified";
+                icon = "✓";
+                title = "VERIFIED";
+                explain = "The current file matches the registered hash. It has not been modified.";
+            } else if (data.status === "TAMPERED") {
+                resultClass = "tampered";
+                icon = "⚠";
+                title = "TAMPERED";
+                explain = "The current hash differs from the original hash. The file has been changed since registration.";
+            } else if (data.status === "NOT FOUND") {
+                title = "NOT FOUND";
             }
+
+            const card = statusCard(resultClass, icon, title, data.message, explain);
+
+            const currentHash = data.current_hash || data.file_hash;
+            if (currentHash) card.appendChild(hashBox("Current Hash", currentHash, true));
+            if (data.original_hash) card.appendChild(hashBox("Original Hash", data.original_hash, true));
+
+            showCard(resultContainer, card);
+
+        } catch (error) {
+
+            showCard(resultContainer, statusCard(
+                "tampered", "✕", "Verification Failed", error.message
+            ));
+
+        } finally {
+
+            setBusy(button, false, "Verify Document", "");
 
         }
-    );
-
+    });
 }
 
 
+// ==========================================
+// BLOCKCHAIN EXPLORER
+// ==========================================
 
-// ==========================================
-// LOAD BLOCKCHAIN
-// ==========================================
+let chainBlocks = [];
+
+function setStat(id, value) {
+    const node = document.getElementById(id);
+    if (node) node.textContent = value;
+}
+
+function hashRow(label, value) {
+    const row = el("div", "block-row");
+    row.appendChild(el("div", "block-label", label));
+    const val = el("div", "block-value hash-value", shortHash(value));
+    val.title = String(value);
+    row.appendChild(val);
+    row.appendChild(copyButton(value));
+    return row;
+}
+
+function textRow(label, value) {
+    const row = el("div", "block-row");
+    row.appendChild(el("div", "block-label", label));
+    row.appendChild(el("div", "block-value", value));
+    row.appendChild(document.createElement("span"));
+    return row;
+}
+
+function renderBlocks() {
+    const container = document.getElementById("blockchainContainer");
+    if (!container) return;
+
+    const searchInput = document.getElementById("blockSearch");
+    const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+
+    const visible = chainBlocks.filter(function (block) {
+        if (!query) return true;
+        return [block.file_name, block.document_id, block.file_hash, block.previous_hash, block.current_hash]
+            .some(function (field) { return String(field).toLowerCase().includes(query); });
+    });
+
+    clearNode(container);
+
+    if (chainBlocks.length === 0) {
+        container.appendChild(statusCard(
+            "", "⬡", "No Blocks Found",
+            "Register a document to create the first blockchain block."
+        ));
+        return;
+    }
+
+    if (visible.length === 0) {
+        container.appendChild(statusCard("not-found", "?", "No matching blocks", "Try a different file name, document ID or hash."));
+        return;
+    }
+
+    visible.forEach(function (block) {
+
+        const isGenesis = Number(block.block_index) === 0 || /^0+$/.test(String(block.previous_hash));
+        const card = el("article", "block-card" + (isGenesis ? " genesis" : ""));
+
+        const header = el("div", "block-header");
+        header.appendChild(el("strong", "", isGenesis ? "Genesis Block" : "Block #" + block.block_index));
+        header.appendChild(el("span", "", block.timestamp));
+        card.appendChild(header);
+
+        const body = el("div", "block-body");
+        body.appendChild(textRow("Block #", block.block_index));
+        body.appendChild(textRow("File Name", block.file_name));
+        body.appendChild(hashRow("Document ID", block.document_id));
+        body.appendChild(hashRow("File SHA-256 Hash", block.file_hash));
+        body.appendChild(hashRow("Previous Hash", block.previous_hash));
+        body.appendChild(hashRow("Current Block Hash", block.current_hash));
+        card.appendChild(body);
+
+        container.appendChild(card);
+    });
+}
 
 async function loadBlockchain() {
 
-    const container =
-        document.getElementById("blockchainContainer");
-
-
+    const container = document.getElementById("blockchainContainer");
     if (!container) return;
 
-
-    container.innerHTML = `
-        <div class="loading">
-            Loading blockchain records...
-        </div>
-    `;
-
+    clearNode(container);
+    container.appendChild(el("div", "loading", "Loading blockchain records..."));
 
     try {
 
-        const response = await fetch(
-            `${API_BASE_URL}/blockchain`
-        );
-
-
+        const response = await fetch(`${API_BASE_URL}/blockchain`);
         const data = await response.json();
 
-
         if (!response.ok) {
-
-            throw new Error(
-                "Could not load blockchain."
-            );
-
+            throw new Error("Could not load blockchain.");
         }
 
+        chainBlocks = data.blocks;
 
-        if (data.blocks.length === 0) {
+        const latest = chainBlocks.length > 0 ? chainBlocks[chainBlocks.length - 1] : null;
+        const documents = new Set(chainBlocks.map(function (b) { return b.document_id; }).filter(Boolean));
 
-            container.innerHTML = `
+        setStat("statBlocks", chainBlocks.length);
+        setStat("statLatest", latest ? "#" + latest.block_index : "–");
+        setStat("statDocs", documents.size);
 
-                <div class="result-card">
-
-                    <h2>No Blocks Found</h2>
-
-                    <p>
-                        Register a document to create the first blockchain block.
-                    </p>
-
-                </div>
-
-            `;
-
-            return;
-
-        }
-
-
-        container.innerHTML = "";
-
-
-        data.blocks.forEach(function (block) {
-
-            const blockCard =
-                document.createElement("div");
-
-
-            blockCard.className = "block-card";
-
-
-            blockCard.innerHTML = `
-
-                <div class="block-header">
-
-                    <strong>
-                        BLOCK #${block.block_index}
-                    </strong>
-
-                    <span>
-                        ${block.timestamp}
-                    </span>
-
-                </div>
-
-
-                <div class="block-body">
-
-                    <div class="block-row">
-
-                        <div class="block-label">
-                            Document
-                        </div>
-
-                        <div class="block-value">
-                            ${block.file_name}
-                        </div>
-
-                    </div>
-
-
-                    <div class="block-row">
-
-                        <div class="block-label">
-                            Document ID
-                        </div>
-
-                        <div class="block-value hash-value">
-                            ${block.document_id}
-                        </div>
-
-                    </div>
-
-
-                    <div class="block-row">
-
-                        <div class="block-label">
-                            File SHA-256 Hash
-                        </div>
-
-                        <div class="block-value hash-value">
-                            ${block.file_hash}
-                        </div>
-
-                    </div>
-
-
-                    <div class="block-row">
-
-                        <div class="block-label">
-                            Previous Hash
-                        </div>
-
-                        <div class="block-value hash-value">
-                            ${block.previous_hash}
-                        </div>
-
-                    </div>
-
-
-                    <div class="block-row">
-
-                        <div class="block-label">
-                            Current Block Hash
-                        </div>
-
-                        <div class="block-value hash-value">
-                            ${block.current_hash}
-                        </div>
-
-                    </div>
-
-                </div>
-
-            `;
-
-
-            container.appendChild(blockCard);
-
-        });
-
+        renderBlocks();
 
     } catch (error) {
 
-        container.innerHTML = `
-
-            <div class="result-card tampered">
-
-                <h2>Unable to Load Blockchain</h2>
-
-                <p>${error.message}</p>
-
-            </div>
-
-        `;
+        chainBlocks = [];
+        clearNode(container);
+        container.appendChild(statusCard("tampered", "✕", "Unable to Load Blockchain", error.message));
 
     }
-
 }
-
-
-
-// ==========================================
-// VALIDATE BLOCKCHAIN
-// ==========================================
 
 async function validateBlockchain() {
 
-    const resultContainer =
-        document.getElementById("validationResult");
-
-
+    const resultContainer = document.getElementById("validationResult");
     if (!resultContainer) return;
 
-
-    resultContainer.innerHTML = `
-
-        <div class="result-card">
-
-            <h2>Validating Blockchain...</h2>
-
-            <p>
-                Checking hashes and block connections.
-            </p>
-
-        </div>
-
-    `;
-
+    showCard(resultContainer, statusCard(
+        "", "…", "Validating Blockchain...", "Checking hashes and block connections."
+    ));
 
     try {
 
-        const response = await fetch(
-            `${API_BASE_URL}/validate-blockchain`
-        );
-
-
+        const response = await fetch(`${API_BASE_URL}/validate-blockchain`);
         const data = await response.json();
 
-
-        const resultClass =
-            data.valid ? "verified" : "tampered";
-
-
-        const title =
-            data.valid
-                ? "✓ BLOCKCHAIN VALID"
-                : "⚠ BLOCKCHAIN INVALID";
-
-
-        resultContainer.innerHTML = `
-
-            <div class="result-card ${resultClass}">
-
-                <div class="result-label">
-                    ${title}
-                </div>
-
-                <p>${data.message}</p>
-
-            </div>
-
-        `;
-
+        const card = statusCard(
+            data.valid ? "verified" : "tampered",
+            data.valid ? "✓" : "⚠",
+            data.valid ? "BLOCKCHAIN VALID" : "BLOCKCHAIN INVALID",
+            data.message
+        );
+        showCard(resultContainer, card);
+        setStat("statStatus", data.valid ? "Valid" : "Invalid");
 
     } catch (error) {
 
-        resultContainer.innerHTML = `
-
-            <div class="result-card tampered">
-
-                <h2>Validation Failed</h2>
-
-                <p>${error.message}</p>
-
-            </div>
-
-        `;
+        showCard(resultContainer, statusCard("tampered", "✕", "Validation Failed", error.message));
 
     }
-
 }
 
+const validateBtn = document.getElementById("validateBtn");
+const refreshBtn = document.getElementById("refreshBtn");
+const blockSearch = document.getElementById("blockSearch");
+
+if (validateBtn) validateBtn.addEventListener("click", validateBlockchain);
+if (refreshBtn) refreshBtn.addEventListener("click", loadBlockchain);
+if (blockSearch) blockSearch.addEventListener("input", renderBlocks);
 
 
 // ==========================================
@@ -684,7 +477,5 @@ async function validateBlockchain() {
 // ==========================================
 
 if (document.getElementById("blockchainContainer")) {
-
     loadBlockchain();
-
 }
