@@ -1,102 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Verify Document | BlockVerify</title>
-
+    <title>Verify Document | IntegraChain</title>
     <link rel="stylesheet" href="css/style.css">
-
 </head>
-
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
 
-    <nav class="navbar">
-
-        <a href="index.html" class="brand">
-            <span class="brand-icon">⬡</span>
-            BlockVerify
-        </a>
-
-        <div class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="upload.html">Register</a>
-            <a class="active" href="verify.html">Verify</a>
-            <a href="blockchain.html">Blockchain</a>
+    <header class="navbar">
+        <div class="container nav-inner">
+            <a href="index.html" class="brand" aria-label="IntegraChain home"><span class="brand-icon" aria-hidden="true">⬡</span>IntegraChain</a>
+            <nav class="nav-links" aria-label="Main">
+                <a href="index.html">Home</a>
+                <a href="upload.html">Register Document</a>
+                <a class="active" href="verify.html" aria-current="page">Verify Document</a>
+                <a href="blockchain.html">Blockchain Explorer</a>
+            </nav>
+            <a href="upload.html" class="btn primary sm nav-cta">Register a Document</a>
         </div>
+    </header>
 
-    </nav>
-
-
-    <main class="page-wrapper">
-
+    <main id="main" class="page">
         <div class="page-header">
-
-            <p class="small-title">FILE VERIFICATION</p>
-
+            <p class="kicker">File verification</p>
             <h1>Verify Document Integrity</h1>
-
-            <p>
-                Upload a document and check whether it is
-                original, tampered with, or not registered.
-            </p>
-
+            <p>Compare the uploaded document against its registered cryptographic fingerprint.</p>
         </div>
-
 
         <div class="upload-panel">
-
             <form id="verifyForm">
-
                 <label class="upload-area" for="verifyFile">
-
-                    <div class="upload-icon">✓</div>
-
-                    <h3>Select a document to verify</h3>
-
-                    <p>
-                        Upload the file for integrity verification
-                    </p>
-
-                    <input
-                        type="file"
-                        id="verifyFile"
-                        accept=".pdf,.txt,.jpg,.jpeg,.png"
-                        required
-                    >
-
+                    <div class="upload-icon" aria-hidden="true">✓</div>
+                    <h3>Drop the document to verify</h3>
+                    <p>or <span class="browse">browse files</span></p>
+                    <span class="limits">PDF, TXT, JPG, JPEG, PNG · Maximum size: 10 MB</span>
+                    <input type="file" id="verifyFile" accept=".pdf,.txt,.jpg,.jpeg,.png" required>
                 </label>
 
+                <div id="verifySelectedFile" class="selected-file" aria-live="polite"></div>
 
-                <p id="verifySelectedFile"
-                   class="selected-file">
-                </p>
-
-
-                <button type="submit"
-                        class="btn primary full-btn">
-
-                    Verify Document
-
-                </button>
-
+                <button type="submit" id="verifyBtn" class="btn primary full-btn">Verify Document</button>
             </form>
-
         </div>
 
-
-        <div id="verifyResult"
-             class="result-container">
-        </div>
-
+        <div id="verifyResult" class="result-container" aria-live="polite"></div>
     </main>
 
+    <footer>
+        <div class="container footer-inner">
+            <p><strong>IntegraChain</strong></p>
+            <p class="footer-small">Blockchain-Powered Document Integrity &amp; Verification</p>
+        </div>
+    </footer>
 
     <script src="js/script.js"></script>
-
 </body>
-
 </html>
